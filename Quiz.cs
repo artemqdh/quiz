@@ -153,39 +153,109 @@
 
         Dictionary<string, Dictionary<int, int>> statisticsQuizzes = new Dictionary<string, Dictionary<int, int>>();
 
-        Dictionary<string, string> userLogin = new Dictionary<string, string>();
-
         string currentUser = string.Empty;
 
         public bool CheckLoginPassword()
         {
-            Console.WriteLine("Type in your username:");
-            string? login = Console.ReadLine();
+            Console.WriteLine("1 - Login\n2 - Registrate");
 
-            Console.WriteLine("Type in your password:");
-            string? password = Console.ReadLine();
+            int? num = null;
 
-            if (userLogin.ContainsKey(login))
+            ConsoleKeyInfo userInputSymbol;
+
+            do
             {
-                string dictPassword = userLogin[login];
+                userInputSymbol = Console.ReadKey(true);
+            }
+            while (userInputSymbol.Key < ConsoleKey.D0 || userInputSymbol.Key > ConsoleKey.D5);
 
-                if (dictPassword == password)
-                {
-                    Console.WriteLine($"Success. Welcome {login}");
-                    currentUser = login;
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine("Wrong username or password.");
-                    return false;
-                }
-            }
-            else
+            num = Convert.ToInt32(userInputSymbol.KeyChar.ToString());
+
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            switch (num)
             {
-                Console.WriteLine("There is no such username.");
-                return false;
+                case 1:
+                    Console.WriteLine("Type in your username:");
+                    string? login = Console.ReadLine();
+
+                    Console.WriteLine("Type in your password:");
+                    string? password = Console.ReadLine();
+                    
+                    if (File.Exists(currentDirectory + login + ".txt"))
+                    {
+                        using (var reader = new StreamReader(currentDirectory + login + ".txt"))
+                        {
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                var parts = line.Split(',');
+                                if (parts.Length == 3)
+                                {
+                                    string fileUsername = parts[0];
+                                    string filePassword = parts[1];
+
+                                    if (fileUsername == login)
+                                    {
+                                        if (filePassword == password)
+                                        {
+                                            Console.WriteLine($"Success. Welcome {login}");
+                                            currentUser = login;
+                                            return true;
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Wrong password.");
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("There is no User with this name.");
+                        break;
+                    }
+
+                case 2:
+                    Console.WriteLine("Type in your new username:");
+                    string? newLogin = Console.ReadLine();
+
+                    Console.WriteLine("Type in your new password:");
+                    string? newPassword = Console.ReadLine();
+
+                    Console.WriteLine("Type in your birthdate:");
+                    string? newDate = Console.ReadLine();
+
+                    currentUser = newLogin;
+
+                    if (!File.Exists(currentDirectory + newLogin + ".txt"))
+                    {
+                        try
+                        {
+                            using (var writer = new StreamWriter(currentDirectory + newLogin + ".txt"))
+                            {
+                                writer.WriteLine($"{newLogin},{newPassword},{newDate}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error in writing the file.");
+                        }
+
+                        Console.WriteLine($"{newLogin} was successfully registrated.");
+                        return true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("There is already a User with this username.");
+                        return false;
+                    }
             }
+            return false;
         }
 
         public void PrintMenu()
@@ -262,6 +332,11 @@
                     }
 
                     break;
+
+                case 2:
+                    RandomQuiz();
+
+                    break;
             }
         }
 
@@ -304,6 +379,80 @@
             int userCorrectCount = 0;
 
             foreach (Question question in questions)
+            {
+                Console.WriteLine(question.questionText);
+
+                for (int i = 0; i < question.answers.Length; i++)
+                {
+                    Console.WriteLine($"{i + 1} - {question.answers[i]}");
+                }
+
+                Console.WriteLine("\nChoose the correct answer:");
+
+                int userAnswer = 0;
+                ConsoleKeyInfo userInputSymbol;
+
+                do
+                {
+                    userInputSymbol = Console.ReadKey();
+                    Console.Clear();
+                }
+                while (userInputSymbol.Key < ConsoleKey.D0 && userInputSymbol.Key > ConsoleKey.D5);
+
+                userAnswer = Convert.ToInt32(Convert.ToInt32(userInputSymbol.KeyChar.ToString()));
+
+                if (userAnswer == question.correctAnswer)
+                {
+                    ++userCorrectCount;
+                    Console.WriteLine("Correct.");
+                }
+                else
+                {
+                    Console.WriteLine($"Wrong. The answer was {question.correctAnswer}.");
+                }
+
+                if (countForeach < 20)
+                {
+                    Console.WriteLine("Press any Key to continue with the Quiz:");
+                    Console.ReadKey();
+                    Console.Clear();
+                    ++countForeach;
+                }
+                else
+                {
+                    Console.WriteLine($"You got the grade: {GradeCalculator(userCorrectCount)}\nYou had {userCorrectCount} questions answered right.\n");
+
+                    Dictionary<int, int> temp = new Dictionary<int, int>
+                    {
+                        {GradeCalculator(userCorrectCount), userCorrectCount}
+                    };
+
+                    statisticsQuizzes.Add(currentUser, temp);
+
+                    Console.WriteLine("Press any Key to return to the main Menu:");
+                    Console.ReadKey();
+                    Console.Clear();
+                }
+            }
+        }
+
+        public void RandomQuiz()
+        {
+            Random random = new Random();
+
+            List<Question> randomizedQuestions = new List<Question>(); 
+
+            for (int i = 0; i < 20;  i++)
+            {
+                int rand = random.Next(60);
+
+                randomizedQuestions.Add(questions_all[rand]);
+            }
+
+            int countForeach = 1;
+            int userCorrectCount = 0;
+
+            foreach (Question question in randomizedQuestions)
             {
                 Console.WriteLine(question.questionText);
 
