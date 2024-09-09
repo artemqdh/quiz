@@ -184,7 +184,7 @@ namespace quiz
 
                     Console.WriteLine("Type in your password:");
                     string? password = Console.ReadLine();
-                    
+
                     if (File.Exists(currentDirectory + login + ".txt"))
                     {
                         using (var reader = new StreamReader(currentDirectory + login + ".txt"))
@@ -279,7 +279,7 @@ namespace quiz
                 ++num;
                 fileName = Path.Combine(statisticsFolder, user + "_" + subject + "_" + num + ".txt");
             }
-            
+
             try
             {
                 using (var writer = new StreamWriter(fileName))
@@ -293,7 +293,7 @@ namespace quiz
             {
                 Console.WriteLine("Error in writing the file.");
             }
-            
+
         }
 
         public void PrintMenu()
@@ -377,7 +377,7 @@ namespace quiz
                         case 3:
                             currentSubject = "geography";
                             QuizCategory(questions_geography);
-                            
+
                             break;
                     }
                     break;
@@ -489,74 +489,82 @@ namespace quiz
             Console.Clear();
             Random random = new Random();
 
-            List<Question> randomizedQuestions = new List<Question>(); 
+            List<Question> randomizedQuestions = new List<Question>();
 
-            for (int i = 0; i < 20;  i++)
+            if (questions_all.Count >= 20)
             {
-                int rand = random.Next(questions_all.Count);
-
-                randomizedQuestions.Add(questions_all[rand]);
-                questions_all.RemoveAt(rand);
-            }
-
-            int countForeach = 1;
-            int userCorrectCount = 0;
-
-            foreach (Question question in randomizedQuestions)
-            {
-                Console.WriteLine(question.questionText);
-
-                for (int i = 0; i < question.answers.Length; i++)
+                for (int i = 0; i <= 20; i++)
                 {
-                    Console.WriteLine($"{i + 1} - {question.answers[i]}");
+                    int rand = random.Next(questions_all.Count);
+
+                    randomizedQuestions.Add(questions_all[rand]);
+                    questions_all.RemoveAt(rand); // problem!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 }
 
-                Console.WriteLine("\nChoose the correct answer:");
+                int countForeach = 1;
+                int userCorrectCount = 0;
 
-                int userAnswer = 0;
-                ConsoleKeyInfo userInputSymbol;
-
-                do
+                foreach (Question question in randomizedQuestions)
                 {
-                    userInputSymbol = Console.ReadKey();
-                    Console.Clear();
-                }
-                while (userInputSymbol.Key < ConsoleKey.D0 && userInputSymbol.Key > ConsoleKey.D5);
+                    Console.WriteLine(question.questionText);
 
-                userAnswer = Convert.ToInt32(Convert.ToInt32(userInputSymbol.KeyChar.ToString()));
+                    for (int i = 0; i < question.answers.Length; i++)
+                    {
+                        Console.WriteLine($"{i + 1} - {question.answers[i]}");
+                    }
 
-                if (userAnswer == question.correctAnswer)
-                {
-                    ++userCorrectCount;
-                    Console.WriteLine("Correct.");
-                }
-                else
-                {
-                    Console.WriteLine($"Wrong. The answer was {question.correctAnswer}.");
-                }
+                    Console.WriteLine("\nChoose the correct answer:");
 
-                if (countForeach < 20)
-                {
-                    Console.WriteLine("Press any Key to continue with the Quiz:");
-                    Console.ReadKey();
-                    Console.Clear();
-                    ++countForeach;
-                }
-                else
-                {
-                    Console.WriteLine($"You got the grade: {GradeCalculator(userCorrectCount)}\nYou had {userCorrectCount} questions answered right.\n");
+                    int userAnswer = 0;
+                    ConsoleKeyInfo userInputSymbol;
 
-                    Dictionary<int, int> temp = new Dictionary<int, int>
+                    do
+                    {
+                        userInputSymbol = Console.ReadKey();
+                        Console.Clear();
+                    }
+                    while (userInputSymbol.Key < ConsoleKey.D0 && userInputSymbol.Key > ConsoleKey.D5);
+
+                    userAnswer = Convert.ToInt32(Convert.ToInt32(userInputSymbol.KeyChar.ToString()));
+
+                    if (userAnswer == question.correctAnswer)
+                    {
+                        ++userCorrectCount;
+                        Console.WriteLine("Correct.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Wrong. The answer was {question.correctAnswer}.");
+                    }
+
+                    if (countForeach < 20)
+                    {
+                        Console.WriteLine("Press any Key to continue with the Quiz:");
+                        Console.ReadKey();
+                        Console.Clear();
+                        ++countForeach;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"You got the grade: {GradeCalculator(userCorrectCount)}\nYou had {userCorrectCount} questions answered right.\n");
+
+                        Dictionary<int, int> temp = new Dictionary<int, int>
                     {
                         {GradeCalculator(userCorrectCount), userCorrectCount}
                     };
 
-                    SaveStatistic(currentUser, userCorrectCount, "randomQuiz");
+                        SaveStatistic(currentUser, userCorrectCount, "randomQuiz");
 
-                    Console.WriteLine("Press any Key to return to the main Menu:");
-                    Console.ReadKey();
-                    Console.Clear();
+                        Console.WriteLine("Press any Key to return to the main Menu:");
+                        Console.ReadKey();
+                        Console.Clear();
+                    }
                 }
+            }
+            else
+            {
+                Console.WriteLine("You can only start the random quiz 3 times. Restart this app.\nPress any key to return to the main menu.");
+                Console.ReadKey();
             }
         }
 
@@ -595,5 +603,56 @@ namespace quiz
             }
         }
 
+        public void PrintTop20()
+        {
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string statisticsFolder = Path.Combine(currentDirectory, "Statistics");
+
+            string[] files = Directory.GetFiles(statisticsFolder, "*_*_*.txt");
+
+            List<string> results = new List<string>();
+
+            foreach (string file in files)
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    string line = reader.ReadLine();
+                    if (line != null)
+                    {
+                        results.Add(line);
+                    }
+                }
+            }
+
+            results.Sort((a, b) =>
+            {
+                int numA = int.Parse(a.Split(',')[1]);
+                int numB = int.Parse(b.Split(',')[1]);
+
+                return numB.CompareTo(numA);
+            });
+
+            Console.WriteLine("Top results:");
+
+            for (int i = 0; i < 20; i++)
+            {
+                if (i >= results.Count)
+                {
+                    Console.WriteLine("\nThat are all results you have.\nPress any key to return to the main menu.");
+                    break; 
+                }
+
+                string line = results[i];
+
+                string[] parts = line.Split(',');
+                int correctCount = int.Parse(parts[1]);
+                string user = parts[2];
+                string subject = parts[3];
+
+                Console.WriteLine($" - Correct Count: {correctCount}, User: {user}, Subject: {subject}");
+            }
+
+            Console.ReadKey();
+        }
     }
 }
