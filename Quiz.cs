@@ -1,4 +1,7 @@
-﻿namespace quiz
+﻿using Microsoft.VisualBasic;
+using System.IO;
+
+namespace quiz
 {
     public class Quiz
     {
@@ -151,9 +154,8 @@
             new Question("Which continent has the most countries?", ["Africa", "Asia", "Europe", "South America"], 1)
         };
 
-        Dictionary<string, Dictionary<int, int>> statisticsQuizzes = new Dictionary<string, Dictionary<int, int>>();
-
         string currentUser = string.Empty;
+        string currentSubject = string.Empty;
 
         public bool CheckLoginPassword()
         {
@@ -258,6 +260,41 @@
             return false;
         }
 
+        public void SaveStatistic(string user, int userCorrectCount, string subject)
+        {
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string statisticsFolder = Path.Combine(currentDirectory, "Statistics");
+
+            if (!Directory.Exists(statisticsFolder))
+            {
+                Directory.CreateDirectory(statisticsFolder);
+            }
+
+            int num = 1;
+            string fileName = Path.Combine(statisticsFolder, user + "_" + subject + "_" + num + ".txt");
+
+            while (File.Exists(fileName))
+            {
+                ++num;
+                fileName = Path.Combine(statisticsFolder, user + "_" + subject + "_" + num + ".txt");
+            }
+            
+            try
+            {
+                using (var writer = new StreamWriter(fileName))
+                {
+                    writer.WriteLine($"{GradeCalculator(userCorrectCount)},{userCorrectCount}");
+                }
+
+                Console.WriteLine($"Your result was successfully saved.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in writing the file.");
+            }
+            
+        }
+
         public void PrintMenu()
         {
             if (CheckLoginPassword())
@@ -322,12 +359,18 @@
                     {
                         case 1:
                             QuizCategory(questions_biology);
+                            currentSubject = "biology";
+
                             break;
                         case 2:
                             QuizCategory(questions_history);
+                            currentSubject = "history";
+
                             break;
                         case 3:
                             QuizCategory(questions_geography);
+                            currentSubject = "geography";
+
                             break;
                     }
 
@@ -427,7 +470,7 @@
                         {GradeCalculator(userCorrectCount), userCorrectCount}
                     };
 
-                    statisticsQuizzes.Add(currentUser, temp);
+                    SaveStatistic(currentUser, userCorrectCount, currentSubject);
 
                     Console.WriteLine("Press any Key to return to the main Menu:");
                     Console.ReadKey();
@@ -501,13 +544,44 @@
                         {GradeCalculator(userCorrectCount), userCorrectCount}
                     };
 
-                    statisticsQuizzes.Add(currentUser, temp);
+                    SaveStatistic(currentUser, userCorrectCount, "randomQuiz");
 
                     Console.WriteLine("Press any Key to return to the main Menu:");
                     Console.ReadKey();
                     Console.Clear();
                 }
             }
+        }
+
+        public void PrintStatistics(string subject)
+        {
+            string currentDirectory = Directory.GetCurrentDirectory();
+            int num = 1;
+
+            string fileName = currentDirectory + currentUser + "_" + subject + "_" + num + ".txt";
+
+            while (File.Exists(currentDirectory + currentUser + num + ".txt"))
+            {
+                fileName = currentDirectory + currentUser + "_" + subject + "_" + num + ".txt";
+                ++num;
+
+                string read = string.Empty;
+
+                try
+                {
+                   using (var reader = new StreamReader(fileName))
+                   {
+                        read = File.ReadAllText(fileName);
+                   }
+                    Console.WriteLine(read);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+
+            
         }
     }
 }
