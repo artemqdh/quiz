@@ -159,6 +159,7 @@ namespace quiz
 
         public bool CheckLoginPassword()
         {
+            Console.WriteLine("Welcome. Please verify yourself.");
             Console.WriteLine("1 - Login\n2 - Registrate");
 
             int? num = null;
@@ -283,7 +284,7 @@ namespace quiz
             {
                 using (var writer = new StreamWriter(fileName))
                 {
-                    writer.WriteLine($"{GradeCalculator(userCorrectCount)},{userCorrectCount}");
+                    writer.WriteLine($"{GradeCalculator(userCorrectCount)},{userCorrectCount},{user},{subject}");
                 }
 
                 Console.WriteLine($"Your result was successfully saved.");
@@ -308,7 +309,7 @@ namespace quiz
                     Console.WriteLine("Welcome to Victorina!");
                     Console.WriteLine("1 - Start new Quiz");
                     Console.WriteLine("2 - See your last quiz results");
-                    Console.WriteLine("3 - See the Top 20 by category");
+                    Console.WriteLine("3 - See the Top 20 results:");
                     Console.WriteLine("4 - Change your settings (login and birthdate)");
                     Console.WriteLine("5 - Exit");
 
@@ -327,6 +328,12 @@ namespace quiz
                     {
                         case 1:
                             StartQuiz();
+                            break;
+                        case 2:
+                            PrintStatistics(currentUser);
+                            break;
+                        case 3:
+                            PrintTop20();
                             break;
                     }
                 }
@@ -358,27 +365,25 @@ namespace quiz
                     switch (categoryNum)
                     {
                         case 1:
-                            QuizCategory(questions_biology);
                             currentSubject = "biology";
+                            QuizCategory(questions_biology);
 
                             break;
                         case 2:
-                            QuizCategory(questions_history);
                             currentSubject = "history";
+                            QuizCategory(questions_history);
 
                             break;
                         case 3:
-                            QuizCategory(questions_geography);
                             currentSubject = "geography";
-
+                            QuizCategory(questions_geography);
+                            
                             break;
                     }
-
                     break;
 
                 case 2:
                     RandomQuiz();
-
                     break;
             }
         }
@@ -481,15 +486,17 @@ namespace quiz
 
         public void RandomQuiz()
         {
+            Console.Clear();
             Random random = new Random();
 
             List<Question> randomizedQuestions = new List<Question>(); 
 
             for (int i = 0; i < 20;  i++)
             {
-                int rand = random.Next(60);
+                int rand = random.Next(questions_all.Count);
 
                 randomizedQuestions.Add(questions_all[rand]);
+                questions_all.RemoveAt(rand);
             }
 
             int countForeach = 1;
@@ -553,35 +560,40 @@ namespace quiz
             }
         }
 
-        public void PrintStatistics(string subject)
+        public void PrintStatistics(string user)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            int num = 1;
+            string statisticsFolder = Path.Combine(currentDirectory, "Statistics");
 
-            string fileName = currentDirectory + currentUser + "_" + subject + "_" + num + ".txt";
+            string[] files = Directory.GetFiles(statisticsFolder, user + "_*_*.txt");
 
-            while (File.Exists(currentDirectory + currentUser + num + ".txt"))
+            if (files.Length > 0)
             {
-                fileName = currentDirectory + currentUser + "_" + subject + "_" + num + ".txt";
-                ++num;
-
-                string read = string.Empty;
-
-                try
+                Console.WriteLine($"Last statistics for {user}:");
+                foreach (string file in files)
                 {
-                   using (var reader = new StreamReader(fileName))
-                   {
-                        read = File.ReadAllText(fileName);
-                   }
-                    Console.WriteLine(read);
+                    using (var reader = new StreamReader(file))
+                    {
+                        string line = reader.ReadLine();
+                        if (line != null)
+                        {
+                            string[] parts = line.Split(',');
+                            string grade = parts[0];
+                            int correctCount = Convert.ToInt32(parts[1]);
+                            string subject = parts[3];
+
+                            Console.WriteLine($" - Correct Count: {correctCount} Grade: {grade} Subject: {subject}");
+                        }
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                Console.ReadKey();
             }
-
-            
+            else
+            {
+                Console.WriteLine($"No statistics found for {user}.");
+                Console.ReadKey();
+            }
         }
+
     }
 }
