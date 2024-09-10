@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using System.IO;
-
-namespace quiz
+﻿namespace quiz
 {
 	public class Quiz
 	{
@@ -154,13 +151,13 @@ namespace quiz
 			new Question("Which continent has the most countries?", ["Africa", "Asia", "Europe", "South America"], 1)
 		};
 
-		string currentUser = string.Empty;
-		string currentSubject = string.Empty;
+		private string _currentUser = string.Empty;
+		private string _currentSubject = string.Empty;
 
 		/*!
 		 * @brief Verifying the User
 		 */
-		public bool CheckLoginPassword()
+		private bool CheckLoginPassword()
 		{
 			Console.WriteLine("Welcome. Please verify yourself.");
 			Console.WriteLine("1 - Login\n2 - Registrate");
@@ -206,7 +203,7 @@ namespace quiz
 										if (filePassword == password)
 										{
 											Console.WriteLine($"Success. Welcome {login}");
-											currentUser = login;
+											_currentUser = login;
 											return true;
 										}
 										else
@@ -236,7 +233,7 @@ namespace quiz
 					Console.WriteLine("Type in your birthdate:");
 					string? newDate = Console.ReadLine();
 
-					currentUser = newLogin;
+					_currentUser = newLogin;
 
 					if (!File.Exists(currentDirectory + newLogin + ".txt"))
 					{
@@ -271,7 +268,7 @@ namespace quiz
 		 * param[in] subject - Using for the path and is getting written into the txt.
 		 * param[in] GradeCalculator() - Using it to get the grade.
 		 */
-		public void SaveStatistic(string user, int userCorrectCount, string subject)
+		private void SaveStatistic(string user, int userCorrectCount, string subject)
 		{
 			string currentDirectory = Directory.GetCurrentDirectory();
 			string statisticsFolder = Path.Combine(currentDirectory, "Statistics");
@@ -323,7 +320,7 @@ namespace quiz
 					Console.WriteLine("1 - Start new Quiz");
 					Console.WriteLine("2 - See your last quiz results");
 					Console.WriteLine("3 - See the Top 20 results:");
-					Console.WriteLine("4 - Change your settings (login and birthdate)");
+					Console.WriteLine("4 - Change your settings (password and birthdate)");
 					Console.WriteLine("5 - Exit");
 
 					Console.WriteLine("\nChoose an option:");
@@ -360,7 +357,7 @@ namespace quiz
 		 * @brief Printing the menu of the "start new quiz" section.
 		 * param[in] ChooseCategory() - Helping function, so the switch case is easier to understand.
 		 */
-		public void StartQuiz()
+		private void StartQuiz()
 		{
 			Console.Clear();
 			Console.WriteLine("1 - Quiz with one category");
@@ -385,17 +382,17 @@ namespace quiz
 					switch (categoryNum)
 					{
 						case 1:
-							currentSubject = "biology";
+							_currentSubject = "biology";
 							QuizCategory(questions_biology);
 
 							break;
 						case 2:
-							currentSubject = "history";
+							_currentSubject = "history";
 							QuizCategory(questions_history);
 
 							break;
 						case 3:
-							currentSubject = "geography";
+							_currentSubject = "geography";
 							QuizCategory(questions_geography);
 
 							break;
@@ -412,7 +409,7 @@ namespace quiz
 		 * @brief Helping function to get the quiz category.
 		 * @return int number for switch case of StartQuiz().
 		 */
-		public int ChooseCategory()
+		private int ChooseCategory()
 		{
 			Console.Clear();
 			Console.WriteLine("1 - Biology\n2 - History\n3 - Geography\n\nChoose a category:");
@@ -425,7 +422,7 @@ namespace quiz
 		 * @brief Calculator for the grade. Russian system (2 - 5).
 		 * @return int grade.
 		 */
-		public int GradeCalculator(int numCorrect)
+		private int GradeCalculator(int numCorrect)
 		{
 			int grade = 0;
 
@@ -455,7 +452,7 @@ namespace quiz
 		 * param[in] GradeCalculator() - Calculating the grade.
 		 * param[in] SaveStatistics() - Saving the result after the user finishes his quiz.
 		 */
-		public void QuizCategory(List<Question> questions)
+		private void QuizCategory(List<Question> questions)
 		{
 			int countForeach = 1;
 			int userCorrectCount = 0;
@@ -504,7 +501,7 @@ namespace quiz
 				{
 					Console.WriteLine($"You got the grade: {GradeCalculator(userCorrectCount)}\nYou had {userCorrectCount} questions answered right.\n");
 
-					SaveStatistic(currentUser, userCorrectCount, currentSubject);
+					SaveStatistic(_currentUser, userCorrectCount, _currentSubject);
 
 					Console.WriteLine("Press any Key to return to the main Menu:");
 					Console.ReadKey();
@@ -518,7 +515,7 @@ namespace quiz
 		 * param[in] GradeCalculator() - Calculating the grade.
 		 * param[in] SaveStatistics() - Saving the result after the user finishes his quiz.
 		 */
-		public void RandomQuiz()
+		private void RandomQuiz()
 		{
 			Console.Clear();
 			Random random = new Random();
@@ -582,7 +579,7 @@ namespace quiz
 					{
 						Console.WriteLine($"You got the grade: {GradeCalculator(userCorrectCount)}\nYou had {userCorrectCount} questions answered right.\n");
 
-						SaveStatistic(currentUser, userCorrectCount, "randomQuiz");
+						SaveStatistic(_currentUser, userCorrectCount, "randomQuiz");
 
 						Console.WriteLine("Press any Key to return to the main Menu:");
 						Console.ReadKey();
@@ -600,16 +597,16 @@ namespace quiz
 		/*!
 		 * @brief Printing the last results of the current user.
 		 */
-		public void PrintStatistics()
+		private void PrintStatistics()
 		{
 			string currentDirectory = Directory.GetCurrentDirectory();
 			string statisticsFolder = Path.Combine(currentDirectory, "Statistics");
 
-			string[] files = Directory.GetFiles(statisticsFolder, currentUser + "_*_*.txt");
+			string[] files = Directory.GetFiles(statisticsFolder, _currentUser + "_*_*.txt");
 
 			if (files.Length > 0)
 			{
-				Console.WriteLine($"Last statistics for {currentUser}:");
+				Console.WriteLine($"Last statistics for {_currentUser}:");
 				foreach (string file in files)
 				{
 					using (var reader = new StreamReader(file))
@@ -630,7 +627,7 @@ namespace quiz
 			}
 			else
 			{
-				Console.WriteLine($"No statistics found for {currentUser}.");
+				Console.WriteLine($"No statistics found for {_currentUser}.");
 				Console.ReadKey();
 			}
 		}
@@ -638,7 +635,7 @@ namespace quiz
 		/*!
 		 * @brief Printing the top 20 results of all user and quizzes.
 		 */
-		public void PrintTop20()
+		private void PrintTop20()
 		{
 			string currentDirectory = Directory.GetCurrentDirectory();
 			string statisticsFolder = Path.Combine(currentDirectory, "Statistics");
@@ -693,7 +690,7 @@ namespace quiz
 		/*!
 		 * @brief Changing the password and birthdate of the current user.
 		 */
-		public void ChangeSettingsUser()
+		private void ChangeSettingsUser()
 		{
 			Console.WriteLine("Enter your new password:");
 			string? newPassword = Console.ReadLine();
@@ -702,13 +699,13 @@ namespace quiz
 			string? newBirthdate = Console.ReadLine();
 
 			string currentDirectory = Directory.GetCurrentDirectory();
-			string filePath = currentDirectory + currentUser + ".txt";
+			string filePath = currentDirectory + _currentUser + ".txt";
 
 			try
 			{
 				using (var writer = new StreamWriter(filePath))
 				{
-					writer.WriteLine($"{currentUser},{newPassword},{newBirthdate}");
+					writer.WriteLine($"{_currentUser},{newPassword},{newBirthdate}");
 				}
 			}
 			catch (Exception ex)
@@ -716,7 +713,7 @@ namespace quiz
 				Console.WriteLine("Error in writing the file.");
 			}
 
-			Console.WriteLine($"{currentUser} was successfully registrated.");
+			Console.WriteLine($"{_currentUser} was successfully registrated.");
 		}
 	}
 }
