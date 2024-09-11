@@ -15,7 +15,7 @@
 			public int correctAnswer;
 		}
 
-		List<Question> questions_biology = new List<Question>
+		private List<Question> _questions_biology = new List<Question>
 		{
 			new Question("What is the Human?", ["Alien", "Mammal", "Monkey", "Homo sapiens"], 4),
 			new Question("How many bones does a Human have?", ["95", "187", "206", "361"], 3),
@@ -39,7 +39,7 @@
 			new Question("Which animal is known for its ability to regenerate limbs?", ["Octopus", "Starfish", "Frog", "Shark"], 2)
 		};
 
-		List<Question> questions_history = new List<Question>()
+		private List<Question> _questions_history = new List<Question>()
 		{
 			new Question("When did World War II end?", ["1943", "1945", "1939", "1941"], 2),
 			new Question("When was the first time Vladimir Putin became president?", ["2000", "2004", "2011", "1998"], 1),
@@ -63,7 +63,7 @@
 			new Question("When did the Industrial Revolution begin?", ["16th century", "17th century", "18th century", "19th century"], 3)
 		};
 
-		List<Question> questions_geography = new List<Question>()
+		private List<Question> _questions_geography = new List<Question>()
 		{
 			new Question("What is the capital city of Portugal?", ["Porto", "Amadora", "Lisbon", "Braga"], 3),
 			new Question("Where is Mount Everest located?", ["Switzerland/Germany", "Morocco/Algeria", "USA/Mexico", "China/Nepal"], 4),
@@ -87,7 +87,7 @@
 			new Question("Which continent has the most countries?", ["Africa", "Asia", "Europe", "South America"], 1)
 		};
 
-		List<Question> questions_all = new List<Question>()
+		private List<Question> _questions_all = new List<Question>()
 		{
 			new Question("What is the Human?", ["Alien", "Mammal", "Monkey", "Homo sapiens"], 4),
 			new Question("How many bones does a Human have?", ["95", "187", "206", "361"], 3),
@@ -383,17 +383,17 @@
 					{
 						case 1:
 							_currentSubject = "biology";
-							QuizCategory(questions_biology);
+							QuizCategory(_questions_biology);
 
 							break;
 						case 2:
 							_currentSubject = "history";
-							QuizCategory(questions_history);
+							QuizCategory(_questions_history);
 
 							break;
 						case 3:
 							_currentSubject = "geography";
-							QuizCategory(questions_geography);
+							QuizCategory(_questions_geography);
 
 							break;
 					}
@@ -522,14 +522,14 @@
 
 			List<Question> randomizedQuestions = new List<Question>();
 
-			if (questions_all.Count >= 20)
+			if (_questions_all.Count >= 20)
 			{
 				for (int i = 0; i <= 20; i++)
 				{
-					int rand = random.Next(questions_all.Count);
+					int rand = random.Next(_questions_all.Count);
 
-					randomizedQuestions.Add(questions_all[rand]);
-					questions_all.RemoveAt(rand); // problem!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					randomizedQuestions.Add(_questions_all[rand]);
+					_questions_all.RemoveAt(rand); // problem!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				}
 
 				int countForeach = 1;
